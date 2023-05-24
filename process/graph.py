@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from config import *
+from utils import *
 
 class Graph():
     # 创建链接
@@ -55,15 +56,31 @@ class Graph():
         # D^-0.5 A D^-0.5
         return np.diag(D**(-0.5)) @ A_new @ np.diag(D**(-0.5))
 
+# if __name__ == '__main__':
+#     graph = Graph()
+#     graph_dict, loss_idx = graph.connect(TRAIN_CSV_DIR+'34908612.jpeg.csv')
+#     adj = graph.get_adjacency_norm(graph_dict)
+#     print(graph_dict)
+#     print(adj)
+#     # 画图
+#     G = nx.from_dict_of_lists(graph_dict)
+#     fig, ax = plt.subplots()
+#     nx.draw(G, ax=ax, with_labels=True)  # show node label
+#     plt.show()
+#     exit()
+
 if __name__ == '__main__':
+    
     graph = Graph()
-    graph_dict, loss_idx = graph.connect(TRAIN_CSV_DIR+'34908612.jpeg.csv')
-    adj = graph.get_adjacency_norm(graph_dict)
-    print(graph_dict)
-    print(adj)
-    # 画图
-    G = nx.from_dict_of_lists(graph_dict)
-    fig, ax = plt.subplots()
-    nx.draw(G, ax=ax, with_labels=True)  # show node label
-    plt.show()
-    exit()
+
+    for file_path in tqdm(glob(TRAIN_CSV_DIR + '*.csv')):
+        graph_dict, loss_idx = graph.connect(file_path)
+        adj = graph.get_adjacency_norm(graph_dict)
+        file_name = os.path.split(file_path)[1][:-3] + 'pkl'
+        file_dump([adj, loss_idx], TRAIN_GRAPH_DIR + file_name)
+
+    for file_path in tqdm(glob(TEST_CSV_DIR + '*.csv')):
+        graph_dict, loss_idx = graph.connect(file_path)
+        adj = graph.get_adjacency_norm(graph_dict)
+        file_name = os.path.split(file_path)[1][:-3] + 'pkl'
+        file_dump([adj, loss_idx], TEST_GRAPH_DIR + file_name)
